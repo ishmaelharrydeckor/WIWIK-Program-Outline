@@ -99,17 +99,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Highlight Tracker Control Panel Buttons
+  const btnModeAuto = document.getElementById('btn-mode-auto');
+  const btnModeManual = document.getElementById('btn-mode-manual');
+
   // Handle manual session clicking/override
   let isManualOverride = false;
-  let overrideTimeout = null;
+
+  function setMode(manual) {
+    isManualOverride = manual;
+    if (manual) {
+      btnModeManual.classList.add('active');
+      btnModeAuto.classList.remove('active');
+    } else {
+      btnModeAuto.classList.add('active');
+      btnModeManual.classList.remove('active');
+      updateLiveSession();
+    }
+  }
+
+  btnModeAuto.addEventListener('click', () => setMode(false));
+  btnModeManual.addEventListener('click', () => setMode(true));
 
   timelineItems.forEach(item => {
     // Add visual hand cursor indicator to show timeline items are interactive
     item.style.cursor = 'pointer';
 
     item.addEventListener('click', () => {
-      isManualOverride = true;
-      if (overrideTimeout) clearTimeout(overrideTimeout);
+      // Force switch to manual mode on click
+      setMode(true);
 
       // Highlight the clicked item
       timelineItems.forEach(el => el.classList.remove('active'));
@@ -117,12 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Scroll to center of view
       item.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-      // Automatically resume standard clock tracking after 10 minutes
-      overrideTimeout = setTimeout(() => {
-        isManualOverride = false;
-        updateLiveSession();
-      }, 600000);
     });
   });
 
