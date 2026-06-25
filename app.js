@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const timelineItems = document.querySelectorAll('.timeline-item');
   const EVENT_DATE = '2026-06-26'; // Event Date
 
-  function updateLiveSession() {
+    if (isManualOverride) return;
+
     const now = new Date();
     
     // Format current date as YYYY-MM-DD
@@ -97,6 +98,33 @@ document.addEventListener('DOMContentLoaded', () => {
       timelineItems[0].classList.add('active');
     }
   }
+
+  // Handle manual session clicking/override
+  let isManualOverride = false;
+  let overrideTimeout = null;
+
+  timelineItems.forEach(item => {
+    // Add visual hand cursor indicator to show timeline items are interactive
+    item.style.cursor = 'pointer';
+
+    item.addEventListener('click', () => {
+      isManualOverride = true;
+      if (overrideTimeout) clearTimeout(overrideTimeout);
+
+      // Highlight the clicked item
+      timelineItems.forEach(el => el.classList.remove('active'));
+      item.classList.add('active');
+
+      // Scroll to center of view
+      item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Automatically resume standard clock tracking after 10 minutes
+      overrideTimeout = setTimeout(() => {
+        isManualOverride = false;
+        updateLiveSession();
+      }, 600000);
+    });
+  });
 
   // Run update immediately on load and then every 30 seconds
   updateLiveSession();
